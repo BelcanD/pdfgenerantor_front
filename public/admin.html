@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Resume Generator - Admin Panel</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PDF Resume Generator - Admin Panel</h1>
+            <div class="api-key-form">
+                <input type="text" id="apiKey" placeholder="Enter your API key">
+                <button onclick="setApiKey()" class="btn-primary">Set API Key</button>
+            </div>
+        </header>
+
+        <section class="templates-section">
+            <h2>Templates</h2>
+            <div id="templatesList" class="templates-list">
+                <!-- Templates will be loaded here -->
+            </div>
+        </section>
+
+        <section class="template-form">
+            <h2>Create New Template</h2>
+            <div class="form-group">
+                <label for="templateName">Template Name:</label>
+                <input type="text" id="templateName" required>
+            </div>
+            <div class="form-group">
+                <label for="templateDescription">Description:</label>
+                <textarea id="templateDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="templateHtml">HTML Content:</label>
+                <textarea id="templateHtml" rows="10" required></textarea>
+            </div>
+            <button onclick="createTemplate()" class="btn-primary">Create Template</button>
+        </section>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html> 
