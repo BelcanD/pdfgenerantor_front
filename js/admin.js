@@ -25,84 +25,54 @@ function setApiKey() {
     }
 }
 
-async function loadTemplates() {
+async function loadTemplates(page = 1) {
     try {
-        const apiKey = localStorage.getItem('apiKey');
-        if (!apiKey) {
-            showError('Please set your API key first');
-            return;
-        }
-
-        const response = await fetch(`${API_BASE_URL}/templates?page=${currentPage}`, {
+        console.log('Loading templates with API key:', apiKey);
+        const response = await fetch(`${API_BASE_URL}/templates?page=${page}&limit=5`, {
             headers: {
-                'x-api-key': apiKey
+                'X-API-Key': apiKey
             }
         });
-
+        
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to load templates');
+            console.error('Error response:', errorData);
+            throw new Error(errorData.message || 'Failed to load templates. Please check your API key.');
         }
-
+        
         const data = await response.json();
-        const templatesList = document.getElementById('templatesList');
-        templatesList.innerHTML = '';
-
+        console.log('Templates loaded:', data);
+        
         if (data.templates && data.templates.length > 0) {
-            data.templates.forEach(template => {
-                const templateElement = document.createElement('div');
-                templateElement.className = 'template-item';
-                templateElement.innerHTML = `
-                    <div class="template-header">
-                        <div class="template-info">
-                            <h3>${template.name}</h3>
-                            <p>${template.description || 'No description'}</p>
-                        </div>
-                        <div class="template-actions">
-                            <button onclick="viewTemplate(${template.id})" class="btn-primary">View</button>
-                            <button onclick="editTemplate(${template.id})" class="btn-warning">Edit</button>
-                            <button onclick="deleteTemplate(${template.id})" class="btn-danger">Delete</button>
-                        </div>
-                    </div>
-                    <div id="template-details-${template.id}" class="template-details">
-                        <h4>Template Details</h4>
-                        <p><strong>ID:</strong> ${template.id}</p>
-                        <p><strong>Name:</strong> ${template.name}</p>
-                        <p><strong>Description:</strong> ${template.description || 'No description'}</p>
-                        <div id="template-html-${template.id}"></div>
-                    </div>
-                `;
-                templatesList.appendChild(templateElement);
-            });
+            displayTemplates(data.templates);
+            updatePagination(data.page, data.totalPages);
         } else {
-            templatesList.innerHTML = '<div class="no-templates">No templates found. Create your first template below!</div>';
+            document.getElementById('templatesList').innerHTML = '<div class="no-templates">No templates found. Create your first template below!</div>';
+            updatePagination(1, 1);
         }
-
-        // Update pagination info
-        totalPages = data.pagination.totalPages;
-        updatePaginationControls();
     } catch (error) {
-        console.error('Error loading templates:', error);
-        showError(error.message || 'Failed to load templates');
+        console.error('Error in loadTemplates:', error);
+        showError(error.message);
         document.getElementById('templatesList').innerHTML = '<div class="no-templates">Failed to load templates. Please check your API key.</div>';
+        updatePagination(1, 1);
     }
 }
 
-function updatePaginationControls() {
-    const prevButton = document.getElementById('prevPage');
-    const nextButton = document.getElementById('nextPage');
-    const pageInfo = document.getElementById('pageInfo');
-
-    prevButton.disabled = currentPage === 1;
-    nextButton.disabled = currentPage === totalPages;
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+function updatePagination(page, total) {
+    currentPage = page;
+    totalPages = total;
+    
+    document.getElementById('pageInfo').textContent = `Page ${page} of ${total}`;
+    document.getElementById('prevPage').disabled = page <= 1;
+    document.getElementById('nextPage').disabled = page >= total;
 }
 
 function changePage(delta) {
     const newPage = currentPage + delta;
     if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
-        loadTemplates();
+        loadTemplates(newPage);
     }
 }
 
@@ -160,7 +130,7 @@ async function createTemplate() {
         const data = await response.json();
         if (response.ok) {
             showSuccess('Template created successfully');
-            loadTemplates();
+            loadTemplates(currentPage);
             clearForm();
         } else {
             showError('Failed to create template: ' + data.message);
@@ -185,7 +155,10 @@ async function deleteTemplate(id) {
 
         if (response.ok) {
             showSuccess('Template deleted successfully');
-            loadTemplates();
+            const newPage = currentPage > 1 && document.querySelectorAll('.template-item').length === 1 
+                ? currentPage - 1 
+                : currentPage;
+            loadTemplates(newPage);
         } else {
             const data = await response.json();
             showError('Failed to delete template: ' + data.message);
@@ -288,7 +261,7 @@ async function updateTemplate(id) {
         const data = await response.json();
         if (response.ok) {
             showSuccess('Template updated successfully');
-            loadTemplates();
+            loadTemplates(currentPage);
             clearForm();
             resetForm();
         } else {

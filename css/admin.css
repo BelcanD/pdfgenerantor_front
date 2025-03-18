@@ -151,36 +151,4 @@ button {
     color: #666;
     background-color: #f8f9fa;
     border-radius: 4px;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding: 1rem;
-}
-
-.pagination button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.pagination button:hover {
-    background-color: #e9ecef;
-}
-
-.pagination button:disabled {
-    background-color: #f8f9fa;
-    color: #adb5bd;
-    cursor: not-allowed;
-}
-
-#pageInfo {
-    font-size: 1rem;
-    color: #495057;
 } 
